@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import axios from "axios";
 import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const Home = () => {
   const [ingredients, setIngredients] = useState("");
@@ -40,14 +41,14 @@ const Home = () => {
 
       // Handle the case where ingredients are provided
       if (ingredients.trim()) {
-        response = await axios.post("http://localhost:5000/get-recipe", {
+        response = await axios.post(`${API_URL}/get-recipe`, {
           ingredients: ingredients.split(",").map((ing) => ing.trim()),
           category: category === "All" ? "" : category, // Send empty string for "All"
         });
       } else {
         // If ingredients are empty, get all recipes for the selected category (or all if "All")
         response = await axios.get(
-          `http://localhost:5000/get-recipes?category=${
+          `${API_URL}/get-recipes?category=${
             category === "All" ? "" : category
           }`,
         );

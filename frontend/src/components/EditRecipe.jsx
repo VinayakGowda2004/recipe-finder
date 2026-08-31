@@ -1,6 +1,8 @@
 import React, { useState, useEffect, useRef } from "react";
 import axios from "axios";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 function EditRecipe() {
   const [recipes, setRecipes] = useState([]);
   const [selectedId, setSelectedId] = useState("");
@@ -29,7 +31,7 @@ function EditRecipe() {
     // Fetch all recipes on mount
     const fetchRecipes = async () => {
       try {
-        const response = await axios.get("http://localhost:5000/get-recipes");
+        const response = await axios.get(`${API_URL}/get-recipes`);
         setRecipes(response.data);
       } catch (error) {
         console.error("Error fetching recipes:", error);
@@ -56,9 +58,7 @@ function EditRecipe() {
 
     setLoading(true);
     try {
-      const response = await axios.get(
-        `http://localhost:5000/get-recipe/${id}`,
-      );
+      const response = await axios.get(`${API_URL}/get-recipe/${id}`);
       const recipe = response.data;
 
       // Revoke old object URLs if any
@@ -177,7 +177,7 @@ function EditRecipe() {
     try {
       const token = localStorage.getItem("token");
       await axios.put(
-        `http://localhost:5000/update-recipe/${selectedId}`,
+        `${API_URL}/update-recipe/${selectedId}`,
         updatedData,
         {
           headers: {
@@ -188,7 +188,7 @@ function EditRecipe() {
       );
       setMessage("✅ Recipe updated successfully!");
       // Refresh recipes list to reflect any changes (optional)
-      const response = await axios.get("http://localhost:5000/get-recipes");
+      const response = await axios.get(`${API_URL}/get-recipes`);
       setRecipes(response.data);
       // Clear selected ID and form if you want:
       // setSelectedId("");

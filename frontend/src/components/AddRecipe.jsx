@@ -1,6 +1,8 @@
 import React, { useState } from "react";
 import axios from "axios";
 
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
+
 const AddRecipe = () => {
   const [formData, setFormData] = useState({
     name: "",
@@ -68,16 +70,12 @@ const AddRecipe = () => {
 
     setLoading(true);
     try {
-      const response = await axios.post(
-        "http://localhost:5000/add-recipe",
-        recipeData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`, // ✅ FIXED: Prefix with Bearer
-          },
+      const response = await axios.post(`${API_URL}/add-recipe`, recipeData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
 
       alert(response.data.message);
 

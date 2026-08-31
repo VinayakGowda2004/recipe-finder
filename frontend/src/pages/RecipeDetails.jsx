@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { motion } from "framer-motion";
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
 const RecipeDetails = () => {
   const { id } = useParams();
@@ -23,9 +24,7 @@ const RecipeDetails = () => {
   useEffect(() => {
     const fetchRecipeDetails = async () => {
       try {
-        const response = await axios.get(
-          `http://localhost:5000/get-recipe/${id}`,
-        );
+        const response = await axios.get(`${API_URL}/get-recipe/${id}`);
         const data = response.data;
 
         setRecipe(data);
@@ -59,7 +58,7 @@ const RecipeDetails = () => {
       const saveHistoryToBackend = async () => {
         try {
           await axios.post(
-            "http://localhost:5000/api/history",
+            `${API_URL}/api/history`,
             {
               recipeId: recipe._id,
               name: recipe.name,
@@ -87,14 +86,11 @@ const RecipeDetails = () => {
 
   const handleGenerate = async () => {
     try {
-      const response = await axios.post(
-        "http://localhost:5000/ai-preparation",
-        {
-          instructions: originalInstructions.join("\n"),
-          ingredients: originalIngredients,
-          people,
-        },
-      );
+      const response = await axios.post(`${API_URL}/ai-preparation`, {
+        instructions: originalInstructions.join("\n"),
+        ingredients: originalIngredients,
+        people,
+      });
 
       const aiInstructions = response.data.stepByStep || "";
       const aiInstructionsArray = Array.isArray(aiInstructions)
