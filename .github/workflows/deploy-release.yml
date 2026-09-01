@@ -5,6 +5,13 @@ on:
     tags:
       - "v*.*.*"
 
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Release tag to deploy (example: v1.1.0)"
+        required: true
+        type: string
+
 jobs:
   deploy:
     runs-on: ubuntu-latest
@@ -20,9 +27,17 @@ jobs:
             cd ~/recipe-finder
 
             git fetch --tags origin
-            git checkout tags/${{ github.ref_name }} --detach
 
-            echo "Deploying version: ${{ github.ref_name }}"
+            if [ -n "${{ github.event.inputs.version }}" ]; then
+              VERSION="${{ github.event.inputs.version }}"
+            else
+              VERSION="${{ github.ref_name }}"
+            fi
+
+            echo "Deploying version: $VERSION"
+
+            git checkout "tags/$VERSION" --detach
+
             git log -1 --oneline
 
             docker compose build
