@@ -135,12 +135,25 @@ const Home = () => {
       <div className="relative max-w-6xl mx-auto px-5 sm:px-8 py-10 sm:py-16">
         {/* Top label */}
         <div className="flex items-center justify-between mb-10 sm:mb-14">
-          <span
-            className="rf-display text-lg sm:text-xl"
-            style={{ color: "#FBF3E7" }}
-          >
-            Pantry<span style={{ color: "#FFB648" }}>Plate</span>
-          </span>
+          <div className="flex items-center gap-3">
+            <span
+              className="rf-display text-lg sm:text-xl"
+              style={{ color: "#FBF3E7" }}
+            >
+              Pantry<span style={{ color: "#FFB648" }}>Plate</span>
+            </span>
+
+            <span
+              className="rf-font text-xs px-2.5 py-1 rounded-full"
+              style={{
+                backgroundColor: "rgba(255,182,72,0.18)",
+                color: "#FFB648",
+              }}
+            >
+              v1.2.0
+            </span>
+          </div>
+
           <span
             className="rf-font text-xs sm:text-sm hidden sm:block"
             style={{ color: "rgba(251,243,231,0.6)" }}
