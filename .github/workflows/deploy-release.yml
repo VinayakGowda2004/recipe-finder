@@ -1,0 +1,30 @@
+name: Deploy Release to AWS EC2
+
+on:
+  push:
+    tags:
+      - "v*.*.*"
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Deploy release to EC2
+        uses: appleboy/ssh-action@v1.2.0
+        with:
+          host: ${{ secrets.EC2_HOST }}
+          username: ${{ secrets.EC2_USER }}
+          key: ${{ secrets.EC2_SSH_KEY }}
+          script: |
+            cd ~/recipe-finder
+
+            git fetch --tags origin
+            git checkout tags/${{ github.ref_name }} --detach
+
+            echo "Deploying version: ${{ github.ref_name }}"
+            git log -1 --oneline
+
+            docker compose build
+            docker compose up -d
+            docker compose ps
