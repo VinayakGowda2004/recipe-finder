@@ -28,12 +28,59 @@ const Login = ({ setUserRole }) => {
   };
 
   return (
-    <div className="flex min-h-screen items-center justify-center bg-gradient-to-br from-blue-500 to-purple-600 p-6">
-      <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-2xl transform transition duration-300 hover:scale-105">
-        <h2 className="text-3xl font-extrabold text-center text-gray-800">
-          Welcome Back!
-        </h2>
-        <p className="text-center text-gray-600">Please login to continue</p>
+    <div
+      className="min-h-screen flex items-center justify-center p-5 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #3B1F39 0%, #D1502F 100%)",
+      }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+        .rf-font { font-family: 'Inter', sans-serif; }
+        .rf-display { font-family: 'Poppins', sans-serif; }
+      `}</style>
+
+      {/* decorative line art */}
+      <svg
+        className="absolute top-6 right-6 pointer-events-none opacity-30"
+        width="160"
+        height="160"
+        viewBox="0 0 160 160"
+        fill="none"
+      >
+        <path
+          d="M10 140 C 60 60, 100 100, 150 20"
+          stroke="#FBF3E7"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <circle cx="20" cy="30" r="3" fill="#FBF3E7" />
+      </svg>
+
+      <div
+        className="relative w-full rounded-3xl p-8 sm:p-10"
+        style={{ maxWidth: "420px", backgroundColor: "rgba(0,0,0,0.32)" }}
+      >
+        <span
+          className="rf-display text-lg block mb-8"
+          style={{ color: "#FBF3E7" }}
+        >
+          Pantry<span style={{ color: "#FFB648" }}>Plate</span>
+        </span>
+
+        <h1
+          className="rf-display text-3xl sm:text-4xl mb-2"
+          style={{ color: "#FBF3E7" }}
+        >
+          Welcome back
+        </h1>
+        <p
+          className="rf-font text-sm mb-8"
+          style={{ color: "rgba(251,243,231,0.7)" }}
+        >
+          Log in to find what's cookable tonight.
+        </p>
+
         <form onSubmit={handleLogin} className="space-y-4">
           <input
             type="email"
@@ -41,7 +88,8 @@ const Login = ({ setUserRole }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            className="rf-font w-full px-5 py-3 rounded-2xl border-0 focus:outline-none text-base"
+            style={{ backgroundColor: "#FBF3E7", color: "#1C1620" }}
           />
           <input
             type="password"
@@ -49,46 +97,53 @@ const Login = ({ setUserRole }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500 shadow-sm"
+            className="rf-font w-full px-5 py-3 rounded-2xl border-0 focus:outline-none text-base"
+            style={{ backgroundColor: "#FBF3E7", color: "#1C1620" }}
           />
 
-          {/* Role Selection */}
-          <div className="flex justify-center space-x-6">
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="radio"
-                value="user"
-                checked={role === "user"}
-                onChange={() => setRole("user")}
-                className="form-radio text-blue-500"
-              />
-              <span className="text-gray-700 font-medium">User</span>
-            </label>
-            <label className="flex items-center space-x-2 cursor-pointer">
-              <input
-                type="radio"
-                value="admin"
-                checked={role === "admin"}
-                onChange={() => setRole("admin")}
-                className="form-radio text-blue-500"
-              />
-              <span className="text-gray-700 font-medium">Admin</span>
-            </label>
+          {/* Role toggle */}
+          <div
+            className="flex p-1 rounded-2xl"
+            style={{ backgroundColor: "rgba(251,243,231,0.12)" }}
+          >
+            {["user", "admin"].map((r) => (
+              <label key={r} className="flex-1 cursor-pointer">
+                <input
+                  type="radio"
+                  value={r}
+                  checked={role === r}
+                  onChange={() => setRole(r)}
+                  className="sr-only"
+                />
+                <div
+                  className="rf-font text-center py-2 rounded-xl text-sm capitalize transition-colors"
+                  style={
+                    role === r
+                      ? { backgroundColor: "#FFB648", color: "#1C1620" }
+                      : { color: "rgba(251,243,231,0.7)" }
+                  }
+                >
+                  {r}
+                </div>
+              </label>
+            ))}
           </div>
 
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-300 shadow-lg"
+            className="rf-display w-full py-3 rounded-2xl font-semibold transition-transform hover:scale-[1.01]"
+            style={{ backgroundColor: "#FFB648", color: "#1C1620" }}
           >
-            Login
+            Log in
           </button>
 
           <button
             type="button"
             onClick={() => navigate("/register")}
-            className="w-full text-center text-blue-600 hover:text-blue-700 font-medium underline transition duration-200"
+            className="rf-font w-full text-center text-sm underline underline-offset-4"
+            style={{ color: "rgba(251,243,231,0.75)" }}
           >
-            Create an account
+            Don't have an account? Create one
           </button>
         </form>
       </div>

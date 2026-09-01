@@ -11,78 +11,183 @@ const Register = () => {
 
   const handleRegister = async (e) => {
     e.preventDefault();
+
     try {
-      const { data } = await registerUser({ username, email, password, role });
+      const { data } = await registerUser({
+        username,
+        email,
+        password,
+        role,
+      });
+
       alert(data.message);
-      navigate("/login"); // Redirect to login after successful registration
+      navigate("/login");
     } catch (err) {
       alert(err.response?.data?.message || "❌ Registration failed");
     }
   };
 
   return (
-    <div className="flex items-center justify-center min-h-screen bg-gradient-to-r from-blue-400 to-purple-500 p-6">
-      <div className="bg-white p-8 rounded-lg shadow-xl w-full max-w-md">
-        <h2 className="text-3xl font-bold text-center text-gray-700 mb-6">
-          Create an Account
-        </h2>
+    <div
+      className="min-h-screen flex items-center justify-center p-5 relative overflow-hidden"
+      style={{
+        background: "linear-gradient(135deg, #3B1F39 0%, #D1502F 100%)",
+      }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+
+        .rf-font {
+          font-family: 'Inter', sans-serif;
+        }
+
+        .rf-display {
+          font-family: 'Poppins', sans-serif;
+        }
+      `}</style>
+
+      {/* Decorative line art */}
+      <svg
+        className="absolute top-6 right-6 pointer-events-none opacity-30"
+        width="160"
+        height="160"
+        viewBox="0 0 160 160"
+        fill="none"
+      >
+        <path
+          d="M10 140 C 60 60, 100 100, 150 20"
+          stroke="#FBF3E7"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <circle cx="20" cy="30" r="3" fill="#FBF3E7" />
+      </svg>
+
+      <div
+        className="relative w-full rounded-3xl p-8 sm:p-10"
+        style={{
+          maxWidth: "420px",
+          backgroundColor: "rgba(0,0,0,0.32)",
+        }}
+      >
+        {/* Brand */}
+        <span
+          className="rf-display text-lg block mb-8"
+          style={{ color: "#FBF3E7" }}
+        >
+          Pantry<span style={{ color: "#FFB648" }}>Plate</span>
+        </span>
+
+        {/* Heading */}
+        <h1
+          className="rf-display text-3xl sm:text-4xl mb-2"
+          style={{ color: "#FBF3E7" }}
+        >
+          Create an account
+        </h1>
+
+        <p
+          className="rf-font text-sm mb-8"
+          style={{ color: "rgba(251,243,231,0.7)" }}
+        >
+          Join PantryPlate and start cooking with what you have.
+        </p>
+
         <form onSubmit={handleRegister} className="space-y-4">
+          {/* Username */}
           <input
             type="text"
             placeholder="Username"
             value={username}
             onChange={(e) => setUsername(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="rf-font w-full px-5 py-3 rounded-2xl border-0 focus:outline-none text-base"
+            style={{
+              backgroundColor: "#FBF3E7",
+              color: "#1C1620",
+            }}
           />
+
+          {/* Email */}
           <input
             type="email"
             placeholder="Email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="rf-font w-full px-5 py-3 rounded-2xl border-0 focus:outline-none text-base"
+            style={{
+              backgroundColor: "#FBF3E7",
+              color: "#1C1620",
+            }}
           />
+
+          {/* Password */}
           <input
             type="password"
             placeholder="Password"
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             required
-            className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            className="rf-font w-full px-5 py-3 rounded-2xl border-0 focus:outline-none text-base"
+            style={{
+              backgroundColor: "#FBF3E7",
+              color: "#1C1620",
+            }}
           />
 
-          {/* Role Selection */}
-          <div className="flex items-center space-x-4">
-            <label className="flex items-center space-x-2">
+          {/* Role toggle */}
+          <div
+            className="flex p-1 rounded-2xl"
+            style={{
+              backgroundColor: "rgba(251,243,231,0.12)",
+            }}
+          >
+            <label className="flex-1 cursor-pointer">
               <input
                 type="radio"
                 value="user"
                 checked={role === "user"}
                 onChange={() => setRole("user")}
-                className="form-radio text-blue-500"
+                className="sr-only"
               />
-              <span>User</span>
+
+              <div
+                className="rf-font text-center py-2 rounded-xl text-sm capitalize transition-colors"
+                style={{
+                  backgroundColor: "#FFB648",
+                  color: "#1C1620",
+                }}
+              >
+                User
+              </div>
             </label>
           </div>
 
+          {/* Register button */}
           <button
             type="submit"
-            className="w-full bg-blue-600 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded-lg transition duration-200"
+            className="rf-display w-full py-3 rounded-2xl font-semibold transition-transform hover:scale-[1.01]"
+            style={{
+              backgroundColor: "#FFB648",
+              color: "#1C1620",
+            }}
           >
-            Register
+            Create account
+          </button>
+
+          {/* Login link */}
+          <button
+            type="button"
+            onClick={() => navigate("/login")}
+            className="rf-font w-full text-center text-sm underline underline-offset-4"
+            style={{
+              color: "rgba(251,243,231,0.75)",
+            }}
+          >
+            Already have an account? Login
           </button>
         </form>
-
-        <p className="text-center mt-4 text-gray-600">
-          Already have an account?{" "}
-          <button
-            onClick={() => navigate("/login")}
-            className="text-blue-600 hover:underline font-medium"
-          >
-            Login
-          </button>
-        </p>
       </div>
     </div>
   );

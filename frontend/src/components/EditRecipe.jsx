@@ -15,6 +15,7 @@ function EditRecipe() {
     image: null, // File object for new upload
     video: null, // File object for new upload
   });
+
   const [message, setMessage] = useState("");
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -23,12 +24,12 @@ function EditRecipe() {
   const imagePreviewRef = useRef(null);
   const videoPreviewRef = useRef(null);
 
-  // Store existing media URLs from backend (to show current media preview)
+  // Store existing media URLs from backend
   const [existingImageUrl, setExistingImageUrl] = useState("");
   const [existingVideoUrl, setExistingVideoUrl] = useState("");
 
+  // ================= FETCH RECIPES =================
   useEffect(() => {
-    // Fetch all recipes on mount
     const fetchRecipes = async () => {
       try {
         const response = await axios.get(`${API_URL}/get-recipes`);
@@ -38,12 +39,14 @@ function EditRecipe() {
         setError("Failed to load recipes.");
       }
     };
+
     fetchRecipes();
   }, []);
 
-  // When user selects a recipe to edit
+  // ================= SELECT RECIPE =================
   const handleSelectChange = async (e) => {
     const id = e.target.value;
+
     setSelectedId(id);
     setMessage("");
     setError("");
@@ -57,6 +60,7 @@ function EditRecipe() {
     }
 
     setLoading(true);
+
     try {
       const response = await axios.get(`${API_URL}/get-recipe/${id}`);
       const recipe = response.data;
@@ -66,6 +70,7 @@ function EditRecipe() {
         URL.revokeObjectURL(imagePreviewRef.current);
         imagePreviewRef.current = null;
       }
+
       if (videoPreviewRef.current) {
         URL.revokeObjectURL(videoPreviewRef.current);
         videoPreviewRef.current = null;
@@ -94,7 +99,7 @@ function EditRecipe() {
     }
   };
 
-  // Clear form & previews
+  // ================= CLEAR FORM =================
   const clearForm = () => {
     setFormData({
       name: "",
@@ -105,6 +110,7 @@ function EditRecipe() {
       image: null,
       video: null,
     });
+
     setExistingImageUrl("");
     setExistingVideoUrl("");
 
@@ -112,15 +118,17 @@ function EditRecipe() {
       URL.revokeObjectURL(imagePreviewRef.current);
       imagePreviewRef.current = null;
     }
+
     if (videoPreviewRef.current) {
       URL.revokeObjectURL(videoPreviewRef.current);
       videoPreviewRef.current = null;
     }
   };
 
-  // Handle form input changes including file inputs
+  // ================= HANDLE INPUT CHANGES =================
   const handleChange = (e) => {
     const { name, value, files } = e.target;
+
     setError("");
     setMessage("");
 
@@ -129,28 +137,44 @@ function EditRecipe() {
       if (imagePreviewRef.current) {
         URL.revokeObjectURL(imagePreviewRef.current);
       }
+
       const newUrl = URL.createObjectURL(files[0]);
       imagePreviewRef.current = newUrl;
-      setFormData((prev) => ({ ...prev, image: files[0] }));
-      // When user picks a new image, clear old preview from backend
+
+      setFormData((prev) => ({
+        ...prev,
+        image: files[0],
+      }));
+
+      // When user picks a new image, clear old preview
       setExistingImageUrl("");
     } else if (name === "video" && files.length > 0) {
       if (videoPreviewRef.current) {
         URL.revokeObjectURL(videoPreviewRef.current);
       }
+
       const newUrl = URL.createObjectURL(files[0]);
       videoPreviewRef.current = newUrl;
-      setFormData((prev) => ({ ...prev, video: files[0] }));
+
+      setFormData((prev) => ({
+        ...prev,
+        video: files[0],
+      }));
+
       // Clear old backend video preview
       setExistingVideoUrl("");
     } else {
-      setFormData((prev) => ({ ...prev, [name]: value }));
+      setFormData((prev) => ({
+        ...prev,
+        [name]: value,
+      }));
     }
   };
 
-  // Submit updated recipe to backend
+  // ================= SUBMIT UPDATED RECIPE =================
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     setMessage("");
     setError("");
 
@@ -160,7 +184,9 @@ function EditRecipe() {
     }
 
     setLoading(true);
+
     const updatedData = new FormData();
+
     updatedData.append("name", formData.name);
     updatedData.append("description", formData.description);
     updatedData.append("ingredients", formData.ingredients);
@@ -170,27 +196,28 @@ function EditRecipe() {
     if (formData.image) {
       updatedData.append("image", formData.image);
     }
+
     if (formData.video) {
       updatedData.append("video", formData.video);
     }
 
     try {
       const token = localStorage.getItem("token");
-      await axios.put(
-        `${API_URL}/update-recipe/${selectedId}`,
-        updatedData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-            Authorization: `Bearer ${token}`,
-          },
+
+      await axios.put(`${API_URL}/update-recipe/${selectedId}`, updatedData, {
+        headers: {
+          "Content-Type": "multipart/form-data",
+          Authorization: `Bearer ${token}`,
         },
-      );
+      });
+
       setMessage("✅ Recipe updated successfully!");
-      // Refresh recipes list to reflect any changes (optional)
+
+      // Refresh recipes list to reflect changes
       const response = await axios.get(`${API_URL}/get-recipes`);
       setRecipes(response.data);
-      // Clear selected ID and form if you want:
+
+      // Keep selected recipe and form as before
       // setSelectedId("");
       // clearForm();
     } catch (error) {
@@ -198,6 +225,7 @@ function EditRecipe() {
       setError("❌ Failed to update recipe.");
     } finally {
       setLoading(false);
+
       setTimeout(() => {
         setMessage("");
         setError("");
@@ -205,181 +233,750 @@ function EditRecipe() {
     }
   };
 
-  // Cleanup preview URLs on unmount
+  // ================= CLEANUP PREVIEW URLS =================
   useEffect(() => {
     return () => {
-      if (imagePreviewRef.current) URL.revokeObjectURL(imagePreviewRef.current);
-      if (videoPreviewRef.current) URL.revokeObjectURL(videoPreviewRef.current);
+      if (imagePreviewRef.current) {
+        URL.revokeObjectURL(imagePreviewRef.current);
+      }
+
+      if (videoPreviewRef.current) {
+        URL.revokeObjectURL(videoPreviewRef.current);
+      }
     };
   }, []);
 
   return (
-    <div className="p-6 bg-white rounded shadow-md max-w-xl mx-auto mt-10">
-      <h2 className="text-2xl font-bold mb-4">Edit Recipe</h2>
+    <div className="w-full">
+      {/* ================= FONTS + CUSTOM STYLES ================= */}
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
 
-      <label htmlFor="recipe-select" className="block mb-1 font-semibold">
-        Select Recipe
-      </label>
-      <select
-        id="recipe-select"
-        className="w-full p-2 border mb-4"
-        value={selectedId}
-        onChange={handleSelectChange}
-        disabled={loading}
-      >
-        <option value="">Select a recipe to edit</option>
-        {recipes.map((recipe) => (
-          <option key={recipe._id} value={recipe._id}>
-            {recipe.name}
-          </option>
-        ))}
-      </select>
+        .rf-font {
+          font-family: 'Inter', sans-serif;
+        }
 
-      {error && (
-        <p className="text-red-600 font-semibold mb-4 text-center">{error}</p>
-      )}
-      {message && (
-        <p className="text-green-600 font-semibold mb-4 text-center">
-          {message}
+        .rf-display {
+          font-family: 'Poppins', sans-serif;
+        }
+
+        .rf-scroll::-webkit-scrollbar {
+          width: 6px;
+        }
+
+        .rf-scroll::-webkit-scrollbar-track {
+          background: rgba(251,243,231,0.08);
+          border-radius: 10px;
+        }
+
+        .rf-scroll::-webkit-scrollbar-thumb {
+          background: rgba(255,182,72,0.6);
+          border-radius: 10px;
+        }
+
+        .rf-input::placeholder {
+          color: rgba(251,243,231,0.35);
+        }
+
+        .rf-input:focus {
+          outline: none;
+          border-color: rgba(255,182,72,0.65) !important;
+          box-shadow: 0 0 0 3px rgba(255,182,72,0.08);
+        }
+
+        .rf-file::-webkit-file-upload-button {
+          margin-right: 12px;
+          padding: 9px 14px;
+          border: 0;
+          border-radius: 10px;
+          background: rgba(255,182,72,0.14);
+          color: #FFB648;
+          font-family: 'Inter', sans-serif;
+          font-weight: 600;
+          cursor: pointer;
+        }
+
+        .rf-file::-webkit-file-upload-button:hover {
+          background: rgba(255,182,72,0.22);
+        }
+
+        .rf-update-btn:hover:not(:disabled) {
+          background: #f5a62f !important;
+          transform: translateY(-1px);
+          box-shadow: 0 8px 24px rgba(255,182,72,0.16);
+        }
+
+        .rf-update-btn:active:not(:disabled) {
+          transform: translateY(0);
+        }
+
+        .rf-update-btn:disabled {
+          opacity: 0.55;
+          cursor: not-allowed;
+        }
+
+        .rf-select {
+          appearance: none;
+          -webkit-appearance: none;
+          background-image:
+            linear-gradient(45deg, transparent 50%, #FFB648 50%),
+            linear-gradient(135deg, #FFB648 50%, transparent 50%);
+          background-position:
+            calc(100% - 18px) 50%,
+            calc(100% - 12px) 50%;
+          background-size: 6px 6px, 6px 6px;
+          background-repeat: no-repeat;
+          padding-right: 40px !important;
+        }
+
+        .rf-select option {
+          background: #241b16;
+          color: #FBF3E7;
+        }
+      `}</style>
+
+      {/* ================= HEADER ================= */}
+      <div className="mb-6">
+        <h3
+          className="rf-display text-xl sm:text-2xl"
+          style={{
+            color: "#FBF3E7",
+          }}
+        >
+          ✏️ Edit a Recipe
+        </h3>
+
+        <p
+          className="rf-font text-sm mt-1"
+          style={{
+            color: "rgba(251,243,231,0.6)",
+          }}
+        >
+          Update recipe details, ingredients, instructions, images, or videos in
+          your PantryPlate collection.
         </p>
+      </div>
+
+      {/* ================= MESSAGE ================= */}
+      {message && (
+        <div
+          className="rf-font mb-5 p-4 rounded-2xl text-sm font-medium"
+          style={{
+            backgroundColor: message.startsWith("✅")
+              ? "rgba(74,222,128,0.12)"
+              : "rgba(248,113,113,0.12)",
+            border: message.startsWith("✅")
+              ? "1px solid rgba(74,222,128,0.25)"
+              : "1px solid rgba(248,113,113,0.25)",
+            color: message.startsWith("✅") ? "#86efac" : "#fca5a5",
+          }}
+        >
+          {message}
+        </div>
       )}
 
-      {selectedId && (
-        <form onSubmit={handleSubmit} encType="multipart/form-data">
-          <label className="block mb-1 font-semibold" htmlFor="name">
-            Recipe Name
-          </label>
-          <input
-            id="name"
-            type="text"
-            name="name"
-            placeholder="Recipe Name"
-            value={formData.name}
-            onChange={handleChange}
-            className="w-full p-2 border mb-2"
-            required
-            disabled={loading}
-          />
-          <label className="block mb-1 font-semibold" htmlFor="description">
-            Description
-          </label>
-          <input
-            id="description"
-            type="text"
-            name="description"
-            placeholder="Description"
-            value={formData.description}
-            onChange={handleChange}
-            className="w-full p-2 border mb-2"
-            required
-            disabled={loading}
-          />
-          <label className="block mb-1 font-semibold" htmlFor="ingredients">
-            Ingredients (comma-separated)
-          </label>
-          <input
-            id="ingredients"
-            type="text"
-            name="ingredients"
-            placeholder="Ingredients (comma-separated)"
-            value={formData.ingredients}
-            onChange={handleChange}
-            className="w-full p-2 border mb-2"
-            required
-            disabled={loading}
-          />
-          <label
-            className="block mb-1 font ChatGPT said: -semibold"
-            htmlFor="instructions"
+      {/* ================= ERROR ================= */}
+      {error && (
+        <div
+          className="rf-font mb-5 p-4 rounded-2xl text-sm font-medium"
+          style={{
+            backgroundColor: "rgba(248,113,113,0.12)",
+            border: "1px solid rgba(248,113,113,0.25)",
+            color: "#fca5a5",
+          }}
+        >
+          {error}
+        </div>
+      )}
+
+      {/* ================= RECIPE SELECTOR ================= */}
+      <div
+        className="p-4 sm:p-5 rounded-3xl mb-5"
+        style={{
+          backgroundColor: "rgba(251,243,231,0.06)",
+          border: "1px solid rgba(251,243,231,0.1)",
+        }}
+      >
+        <div className="flex items-center justify-between gap-3 mb-4">
+          <div>
+            <p
+              className="rf-font text-sm font-medium"
+              style={{
+                color: "#FBF3E7",
+              }}
+            >
+              Select Recipe
+            </p>
+
+            <p
+              className="rf-font text-xs mt-1"
+              style={{
+                color: "rgba(251,243,231,0.45)",
+              }}
+            >
+              Choose the recipe you want to edit.
+            </p>
+          </div>
+
+          <span
+            className="rf-font text-xs px-3 py-1.5 rounded-full flex-shrink-0"
+            style={{
+              backgroundColor: "rgba(255,182,72,0.14)",
+              color: "#FFB648",
+            }}
           >
-            Instructions
-          </label>
-          <input
-            id="instructions"
-            type="text"
-            name="instructions"
-            placeholder="Instructions"
-            value={formData.instructions}
-            onChange={handleChange}
-            className="w-full p-2 border mb-2"
-            required
-            disabled={loading}
+            Admin
+          </span>
+        </div>
+
+        <label
+          htmlFor="recipe-select"
+          className="rf-font block text-xs font-semibold mb-2"
+          style={{
+            color: "rgba(251,243,231,0.65)",
+          }}
+        >
+          Recipe
+        </label>
+
+        <select
+          id="recipe-select"
+          className="rf-font rf-select w-full px-4 py-3 rounded-xl text-sm transition-all"
+          style={{
+            backgroundColor: "rgba(251,243,231,0.06)",
+            border: "1px solid rgba(251,243,231,0.12)",
+            color: "#FBF3E7",
+          }}
+          value={selectedId}
+          onChange={handleSelectChange}
+          disabled={loading}
+        >
+          <option value="">Select a recipe to edit</option>
+
+          {recipes.map((recipe) => (
+            <option key={recipe._id} value={recipe._id}>
+              {recipe.name}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      {/* ================= LOADING RECIPE ================= */}
+      {loading && !selectedId ? (
+        <div
+          className="flex flex-col items-center justify-center py-14 rounded-3xl"
+          style={{
+            backgroundColor: "rgba(251,243,231,0.06)",
+            border: "1px solid rgba(251,243,231,0.1)",
+          }}
+        >
+          <div
+            className="w-10 h-10 border-4 rounded-full animate-spin mb-4"
+            style={{
+              borderColor: "rgba(255,182,72,0.25)",
+              borderTopColor: "#FFB648",
+            }}
           />
-          php-template Copy Edit
-          <label className="block mb-1 font-semibold" htmlFor="category">
-            Category
-          </label>
-          <input
-            id="category"
-            type="text"
-            name="category"
-            placeholder="Category"
-            value={formData.category}
-            onChange={handleChange}
-            className="w-full p-2 border mb-4"
-            required
-            disabled={loading}
-          />
-          <label className="block mb-1 font-semibold" htmlFor="image">
-            Image (optional)
-          </label>
-          <input
-            id="image"
-            type="file"
-            accept="image/*"
-            name="image"
-            onChange={handleChange}
-            className="w-full mb-2"
-            disabled={loading}
-          />
-          {/* Preview new image or existing */}
-          {formData.image && imagePreviewRef.current ? (
-            <img
-              src={imagePreviewRef.current}
-              alt="Selected Preview"
-              className="mb-4 max-h-48 object-contain"
-            />
-          ) : existingImageUrl ? (
-            <img
-              src={existingImageUrl}
-              alt="Current Recipe"
-              className="mb-4 max-h-48 object-contain"
-            />
-          ) : null}
-          <label className="block mb-1 font-semibold" htmlFor="video">
-            Video (optional)
-          </label>
-          <input
-            id="video"
-            type="file"
-            accept="video/*"
-            name="video"
-            onChange={handleChange}
-            className="w-full mb-2"
-            disabled={loading}
-          />
-          {/* Preview new video or existing */}
-          {formData.video && videoPreviewRef.current ? (
-            <video
-              src={videoPreviewRef.current}
-              controls
-              className="mb-4 max-h-48 w-full object-contain"
-            />
-          ) : existingVideoUrl ? (
-            <video
-              src={existingVideoUrl}
-              controls
-              className="mb-4 max-h-48 w-full object-contain"
-            />
-          ) : null}
-          <button
-            type="submit"
-            disabled={loading}
-            className="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition"
+
+          <p
+            className="rf-font text-sm"
+            style={{
+              color: "rgba(251,243,231,0.65)",
+            }}
           >
-            {loading ? "Updating..." : "Update Recipe"}
-          </button>
-        </form>
+            Loading recipes...
+          </p>
+        </div>
+      ) : (
+        <>
+          {/* ================= EDIT FORM ================= */}
+          {selectedId && (
+            <form
+              onSubmit={handleSubmit}
+              encType="multipart/form-data"
+              className="space-y-5"
+            >
+              {/* ================= BASIC DETAILS CARD ================= */}
+              <div
+                className="p-4 sm:p-6 rounded-3xl"
+                style={{
+                  backgroundColor: "rgba(251,243,231,0.06)",
+                  border: "1px solid rgba(251,243,231,0.1)",
+                }}
+              >
+                <div className="mb-5">
+                  <p
+                    className="rf-display text-base sm:text-lg font-semibold"
+                    style={{
+                      color: "#FBF3E7",
+                    }}
+                  >
+                    Recipe Details
+                  </p>
+
+                  <p
+                    className="rf-font text-xs sm:text-sm mt-1"
+                    style={{
+                      color: "rgba(251,243,231,0.45)",
+                    }}
+                  >
+                    Update the basic information for your recipe.
+                  </p>
+                </div>
+
+                {/* ================= RECIPE NAME ================= */}
+                <div className="mb-4">
+                  <label
+                    className="rf-font block text-xs font-semibold mb-2"
+                    style={{
+                      color: "rgba(251,243,231,0.7)",
+                    }}
+                    htmlFor="name"
+                  >
+                    Recipe Name
+                  </label>
+
+                  <input
+                    id="name"
+                    type="text"
+                    name="name"
+                    placeholder="Enter recipe name"
+                    value={formData.name}
+                    onChange={handleChange}
+                    className="rf-font rf-input w-full px-4 py-3 rounded-xl text-sm transition-all"
+                    style={{
+                      backgroundColor: "rgba(251,243,231,0.06)",
+                      border: "1px solid rgba(251,243,231,0.12)",
+                      color: "#FBF3E7",
+                    }}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* ================= DESCRIPTION ================= */}
+                <div className="mb-4">
+                  <label
+                    className="rf-font block text-xs font-semibold mb-2"
+                    style={{
+                      color: "rgba(251,243,231,0.7)",
+                    }}
+                    htmlFor="description"
+                  >
+                    Description
+                  </label>
+
+                  <input
+                    id="description"
+                    type="text"
+                    name="description"
+                    placeholder="Enter recipe description"
+                    value={formData.description}
+                    onChange={handleChange}
+                    className="rf-font rf-input w-full px-4 py-3 rounded-xl text-sm transition-all"
+                    style={{
+                      backgroundColor: "rgba(251,243,231,0.06)",
+                      border: "1px solid rgba(251,243,231,0.12)",
+                      color: "#FBF3E7",
+                    }}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+
+                {/* ================= CATEGORY ================= */}
+                <div>
+                  <label
+                    className="rf-font block text-xs font-semibold mb-2"
+                    style={{
+                      color: "rgba(251,243,231,0.7)",
+                    }}
+                    htmlFor="category"
+                  >
+                    Category
+                  </label>
+
+                  <input
+                    id="category"
+                    type="text"
+                    name="category"
+                    placeholder="e.g. Breakfast, Lunch, Dessert"
+                    value={formData.category}
+                    onChange={handleChange}
+                    className="rf-font rf-input w-full px-4 py-3 rounded-xl text-sm transition-all"
+                    style={{
+                      backgroundColor: "rgba(251,243,231,0.06)",
+                      border: "1px solid rgba(251,243,231,0.12)",
+                      color: "#FBF3E7",
+                    }}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              {/* ================= INGREDIENTS & INSTRUCTIONS ================= */}
+              <div
+                className="p-4 sm:p-6 rounded-3xl"
+                style={{
+                  backgroundColor: "rgba(251,243,231,0.06)",
+                  border: "1px solid rgba(251,243,231,0.1)",
+                }}
+              >
+                <div className="mb-5">
+                  <p
+                    className="rf-display text-base sm:text-lg font-semibold"
+                    style={{
+                      color: "#FBF3E7",
+                    }}
+                  >
+                    Recipe Preparation
+                  </p>
+
+                  <p
+                    className="rf-font text-xs sm:text-sm mt-1"
+                    style={{
+                      color: "rgba(251,243,231,0.45)",
+                    }}
+                  >
+                    Update the ingredients and cooking instructions.
+                  </p>
+                </div>
+
+                {/* ================= INGREDIENTS ================= */}
+                <div className="mb-4">
+                  <label
+                    className="rf-font block text-xs font-semibold mb-2"
+                    style={{
+                      color: "rgba(251,243,231,0.7)",
+                    }}
+                    htmlFor="ingredients"
+                  >
+                    Ingredients
+                  </label>
+
+                  <input
+                    id="ingredients"
+                    type="text"
+                    name="ingredients"
+                    placeholder="Ingredients (comma-separated)"
+                    value={formData.ingredients}
+                    onChange={handleChange}
+                    className="rf-font rf-input w-full px-4 py-3 rounded-xl text-sm transition-all"
+                    style={{
+                      backgroundColor: "rgba(251,243,231,0.06)",
+                      border: "1px solid rgba(251,243,231,0.12)",
+                      color: "#FBF3E7",
+                    }}
+                    required
+                    disabled={loading}
+                  />
+
+                  <p
+                    className="rf-font text-xs mt-2"
+                    style={{
+                      color: "rgba(251,243,231,0.38)",
+                    }}
+                  >
+                    Separate each ingredient with a comma.
+                  </p>
+                </div>
+
+                {/* ================= INSTRUCTIONS ================= */}
+                <div>
+                  <label
+                    className="rf-font block text-xs font-semibold mb-2"
+                    style={{
+                      color: "rgba(251,243,231,0.7)",
+                    }}
+                    htmlFor="instructions"
+                  >
+                    Instructions
+                  </label>
+
+                  <textarea
+                    id="instructions"
+                    name="instructions"
+                    placeholder="Enter cooking instructions"
+                    value={formData.instructions}
+                    onChange={handleChange}
+                    rows={5}
+                    className="rf-font rf-input rf-scroll w-full px-4 py-3 rounded-xl text-sm transition-all resize-y"
+                    style={{
+                      backgroundColor: "rgba(251,243,231,0.06)",
+                      border: "1px solid rgba(251,243,231,0.12)",
+                      color: "#FBF3E7",
+                    }}
+                    required
+                    disabled={loading}
+                  />
+                </div>
+              </div>
+
+              {/* ================= MEDIA CARD ================= */}
+              <div
+                className="p-4 sm:p-6 rounded-3xl"
+                style={{
+                  backgroundColor: "rgba(251,243,231,0.06)",
+                  border: "1px solid rgba(251,243,231,0.1)",
+                }}
+              >
+                <div className="mb-5">
+                  <p
+                    className="rf-display text-base sm:text-lg font-semibold"
+                    style={{
+                      color: "#FBF3E7",
+                    }}
+                  >
+                    Recipe Media
+                  </p>
+
+                  <p
+                    className="rf-font text-xs sm:text-sm mt-1"
+                    style={{
+                      color: "rgba(251,243,231,0.45)",
+                    }}
+                  >
+                    Upload new media only if you want to replace the existing
+                    files.
+                  </p>
+                </div>
+
+                {/* ================= IMAGE ================= */}
+                <div className="mb-6">
+                  <label
+                    className="rf-font block text-xs font-semibold mb-2"
+                    style={{
+                      color: "rgba(251,243,231,0.7)",
+                    }}
+                    htmlFor="image"
+                  >
+                    Image
+                    <span
+                      className="font-normal ml-1"
+                      style={{
+                        color: "rgba(251,243,231,0.4)",
+                      }}
+                    >
+                      (optional)
+                    </span>
+                  </label>
+
+                  <input
+                    id="image"
+                    type="file"
+                    accept="image/*"
+                    name="image"
+                    onChange={handleChange}
+                    className="rf-font rf-file w-full text-xs sm:text-sm"
+                    style={{
+                      color: "rgba(251,243,231,0.55)",
+                    }}
+                    disabled={loading}
+                  />
+
+                  {/* New image preview */}
+                  {formData.image && imagePreviewRef.current ? (
+                    <div
+                      className="mt-4 p-3 rounded-2xl"
+                      style={{
+                        backgroundColor: "rgba(251,243,231,0.05)",
+                        border: "1px solid rgba(251,243,231,0.1)",
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span
+                          className="rf-font text-xs font-semibold"
+                          style={{
+                            color: "#FFB648",
+                          }}
+                        >
+                          New Image Preview
+                        </span>
+                      </div>
+
+                      <img
+                        src={imagePreviewRef.current}
+                        alt="Selected Preview"
+                        className="w-full max-h-72 object-contain rounded-xl"
+                      />
+                    </div>
+                  ) : existingImageUrl ? (
+                    <div
+                      className="mt-4 p-3 rounded-2xl"
+                      style={{
+                        backgroundColor: "rgba(251,243,231,0.05)",
+                        border: "1px solid rgba(251,243,231,0.1)",
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span
+                          className="rf-font text-xs font-semibold"
+                          style={{
+                            color: "rgba(251,243,231,0.65)",
+                          }}
+                        >
+                          Current Image
+                        </span>
+                      </div>
+
+                      <img
+                        src={existingImageUrl}
+                        alt="Current Recipe"
+                        className="w-full max-h-72 object-contain rounded-xl"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+
+                {/* ================= VIDEO ================= */}
+                <div>
+                  <label
+                    className="rf-font block text-xs font-semibold mb-2"
+                    style={{
+                      color: "rgba(251,243,231,0.7)",
+                    }}
+                    htmlFor="video"
+                  >
+                    Video
+                    <span
+                      className="font-normal ml-1"
+                      style={{
+                        color: "rgba(251,243,231,0.4)",
+                      }}
+                    >
+                      (optional)
+                    </span>
+                  </label>
+
+                  <input
+                    id="video"
+                    type="file"
+                    accept="video/*"
+                    name="video"
+                    onChange={handleChange}
+                    className="rf-font rf-file w-full text-xs sm:text-sm"
+                    style={{
+                      color: "rgba(251,243,231,0.55)",
+                    }}
+                    disabled={loading}
+                  />
+
+                  {/* New video preview */}
+                  {formData.video && videoPreviewRef.current ? (
+                    <div
+                      className="mt-4 p-3 rounded-2xl"
+                      style={{
+                        backgroundColor: "rgba(251,243,231,0.05)",
+                        border: "1px solid rgba(251,243,231,0.1)",
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span
+                          className="rf-font text-xs font-semibold"
+                          style={{
+                            color: "#FFB648",
+                          }}
+                        >
+                          New Video Preview
+                        </span>
+                      </div>
+
+                      <video
+                        src={videoPreviewRef.current}
+                        controls
+                        className="w-full max-h-72 rounded-xl object-contain"
+                      />
+                    </div>
+                  ) : existingVideoUrl ? (
+                    <div
+                      className="mt-4 p-3 rounded-2xl"
+                      style={{
+                        backgroundColor: "rgba(251,243,231,0.05)",
+                        border: "1px solid rgba(251,243,231,0.1)",
+                      }}
+                    >
+                      <div className="flex items-center justify-between mb-3">
+                        <span
+                          className="rf-font text-xs font-semibold"
+                          style={{
+                            color: "rgba(251,243,231,0.65)",
+                          }}
+                        >
+                          Current Video
+                        </span>
+                      </div>
+
+                      <video
+                        src={existingVideoUrl}
+                        controls
+                        className="w-full max-h-72 rounded-xl object-contain"
+                      />
+                    </div>
+                  ) : null}
+                </div>
+              </div>
+
+              {/* ================= UPDATE BUTTON ================= */}
+              <button
+                type="submit"
+                disabled={loading}
+                className="rf-font rf-update-btn w-full px-5 py-3.5 rounded-2xl font-semibold text-sm transition-all duration-200"
+                style={{
+                  backgroundColor: "#FFB648",
+                  color: "#241b16",
+                }}
+              >
+                {loading ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <span
+                      className="w-4 h-4 border-2 rounded-full animate-spin"
+                      style={{
+                        borderColor: "rgba(36,27,22,0.25)",
+                        borderTopColor: "#241b16",
+                      }}
+                    />
+                    Updating...
+                  </span>
+                ) : (
+                  "✏️ Update Recipe"
+                )}
+              </button>
+            </form>
+          )}
+
+          {/* ================= NO RECIPE SELECTED ================= */}
+          {!selectedId && !loading && (
+            <div
+              className="text-center py-14 px-5 rounded-3xl"
+              style={{
+                backgroundColor: "rgba(251,243,231,0.06)",
+                border: "1px solid rgba(251,243,231,0.1)",
+              }}
+            >
+              <div className="text-5xl mb-4">🍳</div>
+
+              <h4
+                className="rf-display text-lg"
+                style={{
+                  color: "#FBF3E7",
+                }}
+              >
+                Select a recipe to edit
+              </h4>
+
+              <p
+                className="rf-font text-sm mt-2"
+                style={{
+                  color: "rgba(251,243,231,0.55)",
+                }}
+              >
+                Choose a recipe from the list above to view and update its
+                details.
+              </p>
+            </div>
+          )}
+        </>
       )}
     </div>
   );

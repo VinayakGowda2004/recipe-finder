@@ -4,6 +4,16 @@ import { useNavigate } from "react-router-dom";
 import { motion } from "framer-motion";
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:5000";
 
+const CATEGORIES = [
+  "All",
+  "Vegetarian",
+  "Non-Vegetarian",
+  "Dessert",
+  "Quick Meals",
+  "Coffees",
+  "Soups",
+];
+
 const Home = () => {
   const [ingredients, setIngredients] = useState("");
   const [category, setCategory] = useState("All");
@@ -82,82 +92,197 @@ const Home = () => {
     navigate(`/recipe/${id}`);
   };
 
-  return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-100 to-yellow-200 p-6">
-      <div className="max-w-4xl mx-auto bg-white shadow-lg rounded-xl p-8">
-        <h1 className="text-4xl font-bold text-center text-orange-700 mb-4">
-          Smart Recipe Finder
-        </h1>
-        <p className="text-center text-gray-600 mb-6">
-          Enter ingredients (comma-separated), select a category, and discover
-          delicious recipes!
-        </p>
+  const tagColor =
+    category === "Vegetarian"
+      ? { backgroundColor: "rgba(143,214,148,0.18)", color: "#8FD694" }
+      : category === "Non-Vegetarian"
+        ? { backgroundColor: "rgba(255,122,92,0.18)", color: "#FF7A5C" }
+        : category !== "All"
+          ? { backgroundColor: "rgba(255,182,72,0.18)", color: "#FFB648" }
+          : null;
 
-        <div className="flex flex-col sm:flex-row gap-4">
-          <input
-            type="text"
-            value={ingredients}
-            onChange={(e) => setIngredients(e.target.value)}
-            placeholder="e.g. tomato, onion, cheese"
-            className="flex-1 p-3 border border-gray-300 rounded-lg shadow-md"
-          />
-          <select
-            value={category}
-            onChange={(e) => setCategory(e.target.value)}
-            className="p-3 border border-gray-300 rounded-lg shadow-md"
+  return (
+    <div
+      className="min-h-screen"
+      style={{
+        background: "linear-gradient(135deg, #3B1F39 0%, #D1502F 100%)",
+      }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+        .rf-font { font-family: 'Inter', sans-serif; }
+        .rf-display { font-family: 'Poppins', sans-serif; }
+        .rf-scroll::-webkit-scrollbar { display: none; }
+      `}</style>
+
+      {/* decorative line art */}
+      <svg
+        className="absolute top-0 left-0 pointer-events-none opacity-30"
+        width="220"
+        height="220"
+        viewBox="0 0 220 220"
+        fill="none"
+      >
+        <path
+          d="M10 120 C 60 40, 140 40, 150 10"
+          stroke="#FBF3E7"
+          strokeWidth="2"
+          strokeLinecap="round"
+        />
+        <circle cx="190" cy="30" r="3" fill="#FBF3E7" />
+      </svg>
+
+      <div className="relative max-w-6xl mx-auto px-5 sm:px-8 py-10 sm:py-16">
+        {/* Top label */}
+        <div className="flex items-center justify-between mb-10 sm:mb-14">
+          <span
+            className="rf-display text-lg sm:text-xl"
+            style={{ color: "#FBF3E7" }}
           >
-            <option value="All">All Categories</option>
-            <option value="Vegetarian">Vegetarian</option>
-            <option value="Non-Vegetarian">Non-Vegetarian</option>
-            <option value="Dessert">Dessert</option>
-            <option value="Quick Meals">Quick Meals</option>
-            <option value="Coffees">Coffees</option>
-            <option value="Soups">Soups</option>
-          </select>
-          <button
-            onClick={handleSearch}
-            className="px-6 py-3 bg-orange-600 text-white font-semibold rounded-lg hover:bg-orange-700 transition"
+            Pantry<span style={{ color: "#FFB648" }}>Plate</span>
+          </span>
+          <span
+            className="rf-font text-xs sm:text-sm hidden sm:block"
+            style={{ color: "rgba(251,243,231,0.6)" }}
           >
-            Search
-          </button>
+            Real recipes from what's already in your kitchen
+          </span>
         </div>
 
-        {error && <p className="mt-4 text-red-600 text-center">{error}</p>}
+        {/* Hero */}
+        <div className="max-w-2xl mb-10 sm:mb-12">
+          <h1
+            className="rf-display text-4xl sm:text-5xl lg:text-6xl leading-[1.1] mb-4"
+            style={{ color: "#FBF3E7" }}
+          >
+            What's in your
+            <br />
+            kitchen?
+          </h1>
+          <p
+            className="rf-font text-base sm:text-lg"
+            style={{ color: "rgba(251,243,231,0.75)" }}
+          >
+            List your ingredients or pick a category — we'll match you with
+            recipes you can actually cook.
+          </p>
+        </div>
+
+        {/* Search console */}
+        <div
+          className="rounded-3xl p-4 sm:p-5 mb-10 sm:mb-12"
+          style={{ backgroundColor: "rgba(0,0,0,0.28)" }}
+        >
+          <div className="flex flex-col sm:flex-row gap-3 mb-4">
+            <input
+              type="text"
+              value={ingredients}
+              onChange={(e) => setIngredients(e.target.value)}
+              onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+              placeholder="tomato, onion, cheese..."
+              className="rf-font flex-1 px-5 py-3 rounded-2xl border-0 focus:outline-none text-base"
+              style={{ backgroundColor: "#FBF3E7", color: "#1C1620" }}
+            />
+            <button
+              onClick={handleSearch}
+              className="rf-display px-8 py-3 rounded-2xl font-semibold transition-transform hover:scale-[1.02] whitespace-nowrap"
+              style={{ backgroundColor: "#FFB648", color: "#1C1620" }}
+            >
+              Find recipes
+            </button>
+          </div>
+
+          <div className="rf-scroll flex gap-2 overflow-x-auto">
+            {CATEGORIES.map((cat) => (
+              <button
+                key={cat}
+                onClick={() => setCategory(cat)}
+                className="rf-font px-4 py-2 rounded-full text-sm whitespace-nowrap transition-colors flex-shrink-0"
+                style={
+                  category === cat
+                    ? { backgroundColor: "#FBF3E7", color: "#1C1620" }
+                    : {
+                        backgroundColor: "rgba(251,243,231,0.12)",
+                        color: "#FBF3E7",
+                      }
+                }
+              >
+                {cat}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Status */}
+        {error && (
+          <p className="rf-font mb-8 text-sm px-1" style={{ color: "#FFD9C7" }}>
+            {error}
+          </p>
+        )}
         {loading && (
-          <p className="mt-4 text-center animate-pulse">
-            ⏳ Searching for recipes...
+          <p
+            className="rf-font mb-8 text-sm px-1"
+            style={{ color: "rgba(251,243,231,0.75)" }}
+          >
+            Searching your pantry…
           </p>
         )}
 
-        <div className="mt-8 grid grid-cols-1 sm:grid-cols-2 gap-6">
+        {/* Results */}
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5 sm:gap-6">
           {recipes.map((recipe, index) => (
             <motion.div
               key={recipe.id || recipe._id}
-              className="bg-orange-50 p-4 rounded-xl shadow-md hover:shadow-lg cursor-pointer transition"
               onClick={() => handleViewRecipe(recipe.id || recipe._id)}
-              initial={{ opacity: 0, y: 30 }}
+              className="cursor-pointer rounded-3xl overflow-hidden group"
+              style={{ backgroundColor: "#1C1620" }}
+              initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
+              transition={{ delay: index * 0.05 }}
             >
-              <h2 className="text-xl font-bold text-orange-800">
-                {recipe.name}
-              </h2>
-
-              <p className="text-sm text-gray-600 mt-1 italic">
-                {recipe.description.length > 100
-                  ? `${recipe.description.substring(0, 100)}...`
-                  : recipe.description}
-              </p>
-
-              {recipe.imageUrl && (
-                <div className="w-full aspect-[4/3] mt-3 rounded-lg overflow-hidden shadow-sm">
+              <div
+                className="w-full aspect-[4/3] overflow-hidden"
+                style={{ backgroundColor: "#2A2028" }}
+              >
+                {recipe.imageUrl ? (
                   <img
                     src={recipe.imageUrl}
                     alt={recipe.name}
-                    className="w-full h-full object-cover transition duration-300 hover:scale-105"
+                    className="w-full h-full object-cover transition-transform duration-300 group-hover:scale-[1.06]"
                   />
-                </div>
-              )}
+                ) : (
+                  <div
+                    className="w-full h-full flex items-center justify-center rf-font text-sm"
+                    style={{ color: "rgba(251,243,231,0.4)" }}
+                  >
+                    No photo yet
+                  </div>
+                )}
+              </div>
+              <div className="p-4 sm:p-5">
+                {tagColor && (
+                  <span
+                    className="rf-font inline-block text-xs px-3 py-1 rounded-full mb-2"
+                    style={tagColor}
+                  >
+                    {category}
+                  </span>
+                )}
+                <h2
+                  className="rf-display text-lg sm:text-xl mb-1"
+                  style={{ color: "#FBF3E7" }}
+                >
+                  {recipe.name}
+                </h2>
+                <p
+                  className="rf-font text-sm leading-relaxed"
+                  style={{ color: "rgba(251,243,231,0.65)" }}
+                >
+                  {recipe.description.length > 100
+                    ? `${recipe.description.substring(0, 100)}...`
+                    : recipe.description}
+                </p>
+              </div>
             </motion.div>
           ))}
         </div>

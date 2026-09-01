@@ -40,40 +40,79 @@ function App() {
     navigate("/");
   };
 
-  if (isLoading) return <div className="flex justify-center items-center h-screen text-lg font-semibold">Loading...</div>;
+  if (isLoading) {
+    return (
+      <div
+        className="flex justify-center items-center h-screen"
+        style={{
+          background: "linear-gradient(135deg, #3B1F39 0%, #D1502F 100%)",
+        }}
+      >
+        <style>{`
+          @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+        `}</style>
+        <p
+          style={{
+            fontFamily: "'Poppins', sans-serif",
+            color: "#FBF3E7",
+          }}
+          className="text-lg font-semibold"
+        >
+          Loading…
+        </p>
+      </div>
+    );
+  }
 
   return (
-    <div className="min-h-screen flex flex-col">
+    <div
+      className="min-h-screen flex flex-col"
+      style={{ backgroundColor: "#1C1620" }}
+    >
+      <style>{`
+        @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@600;700;800&family=Inter:wght@400;500;600&display=swap');
+        .rf-font { font-family: 'Inter', sans-serif; }
+        .rf-display { font-family: 'Poppins', sans-serif; }
+      `}</style>
+
       {/* ✅ Navbar */}
       {userRole && (
-        <nav className="bg-gray-800 text-white p-4 flex justify-between items-center shadow-md">
-          <div className="flex gap-4">
+        <nav
+          className="flex justify-between items-center px-5 sm:px-8 py-4"
+          style={{
+            background: "linear-gradient(135deg, #3B1F39 0%, #D1502F 100%)",
+          }}
+        >
+          <div className="flex gap-2 sm:gap-3">
             <button
               onClick={() => navigate(userRole === "admin" ? "/admin" : "/home")}
-              className="text-lg font-semibold hover:text-gray-300"
+              className="rf-display text-sm sm:text-base font-semibold px-4 py-2 rounded-full transition-colors"
+              style={{ color: "#FBF3E7", backgroundColor: "rgba(251,243,231,0.1)" }}
             >
-              🏠 {userRole === "admin" ? "Admin Panel" : "Home"}
+              {userRole === "admin" ? "Admin Panel" : "Home"}
             </button>
             {userRole === "user" && (
               <button
                 onClick={() => navigate("/history")}
-                className="text-lg font-semibold hover:text-gray-300"
+                className="rf-display text-sm sm:text-base font-semibold px-4 py-2 rounded-full transition-colors"
+                style={{ color: "#FBF3E7", backgroundColor: "rgba(251,243,231,0.1)" }}
               >
-                📜 History
+                History
               </button>
             )}
           </div>
           <button
             onClick={handleLogout}
-            className="bg-red-500 px-4 py-2 rounded-lg hover:bg-red-600 transition"
+            className="rf-display text-sm sm:text-base font-semibold px-4 sm:px-5 py-2 rounded-full transition-transform hover:scale-[1.03]"
+            style={{ backgroundColor: "#FFB648", color: "#1C1620" }}
           >
-            🚪 Logout
+            Logout
           </button>
         </nav>
       )}
 
       {/* ✅ Main Content */}
-      <div className="flex-grow container mx-auto p-6">
+      <div className="flex-grow">
         <Routes>
           <Route path="/" element={userRole ? <Navigate to={userRole === "admin" ? "/admin" : "/home"} /> : <Login setUserRole={setUserRole} />} />
           <Route path="/register" element={!userRole ? <Register /> : <Navigate to="/" />} />
@@ -86,8 +125,16 @@ function App() {
       </div>
 
       {/* ✅ Footer */}
-      <footer className="bg-gray-800 text-white text-center p-4 mt-6 shadow-inner">
-        <p>&copy; 2025 AI Recipe Generator. All rights reserved.</p>
+      <footer
+        className="text-center py-5"
+        style={{ backgroundColor: "#1C1620" }}
+      >
+        <p
+          className="rf-font text-sm"
+          style={{ color: "rgba(251,243,231,0.55)" }}
+        >
+          © 2026 PantryPlate — recipes from what's already in your kitchen.
+        </p>
       </footer>
     </div>
   );
